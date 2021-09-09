@@ -2,6 +2,8 @@ import  {useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Header from './components/Header';
 import Search from './components/Search';
+import ImageCard from './components/ImageCard';
+import { Container, Row, Col } from 'react-bootstrap';
 
 
 const UNPLASH_KEY = process.env.REACT_APP_UNPLASH_KEY; 
@@ -10,17 +12,17 @@ const UNPLASH_KEY = process.env.REACT_APP_UNPLASH_KEY;
 const App = () =>{
   const [word, setWord] = useState('');
   const [images, setImages] = useState([]);
-  console.log(images);
+  
 
   const handleSearchSubmit = (e) =>{
     e.preventDefault();
     
-    console.log(word); // get the value written 
+    // console.log(word); // get the value written 
     
     fetch(`https://api.unsplash.com/photos/random/?query=${word}&client_id=${UNPLASH_KEY}`)
       .then((res) => res.json())
       .then((data) => {
-        setImages([data, ...images]) // new array of images {...}, {}, {}
+        setImages([{...data, title: word}, ...images]) // new array of images {...}, {}, {} // console.log(images); // spread data
       })
       .catch((err) => {
         console.log(err);
@@ -29,11 +31,28 @@ const App = () =>{
       setWord('');
   };
 
+
+  const handleDeleteImage = (id) =>{
+
+    setImages(images.filter((image) => image.id !== id ));
+
+  };
+
   return (
     <div>
       <Header title="Images Gallery" />
       <Search word={word} setWord={setWord} handleSubmit={handleSearchSubmit} />
-    </div>
+      
+      <Container className="mt-4">  {/* mt-4 margin-top: 4*/}
+        <Row xs={1} ms={2} lg={3}>
+          {images.map((image, i) => (
+            <Col key={i} className="pb-3"> {/* pn = page-bottom */}
+              <ImageCard image={image} deleteImage={handleDeleteImage} />
+            </Col>
+          ))} 
+        </Row>
+      </Container>
+    </div> // image = value, i = index // implicit return
   );
 }
 
@@ -53,5 +72,8 @@ Note: Anytime when state of component changes,
 component is re-rendered.
 
 fetch is a promise
+
+if images.length is less 1 don't display photo, else display photo
+{!!images.length && <ImageCard image={images[0]} />}
 
 */
